@@ -19,7 +19,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from core.views import api_overview
+
 urlpatterns = [
+    path('', api_overview, name='api-overview'),
     path('admin/', admin.site.urls),
     path('api/', include('auth_app.api.urls')),
     path('api/', include('profile_app.api.urls')),
