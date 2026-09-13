@@ -21,10 +21,8 @@ class ReviewListCreateTests(APITestCase):
 
     def setUp(self) -> None:
         """Create a business user and a customer to act as reviewer."""
-        self.business_user, self.business_token = create_user_with_profile(
-            'reviewbiz', 'business')
-        self.customer_user, self.customer_token = create_user_with_profile(
-            'reviewcust', 'customer')
+        self.business_user, self.business_token = create_user_with_profile('reviewbiz', 'business')
+        self.customer_user, self.customer_token = create_user_with_profile('reviewcust', 'customer')
         self.url = reverse('review-list')
 
     def authenticate(self, token: Token) -> None:
@@ -49,16 +47,12 @@ class ReviewListCreateTests(APITestCase):
     def test_list_filters_by_business_user_id(self) -> None:
         """Filtering by business_user_id should only return reviews for that user."""
         other_business, _ = create_user_with_profile('otherbiz', 'business')
-        Review.objects.create(business_user=self.business_user,
-                              reviewer=self.customer_user, rating=4)
-        another_customer, _ = create_user_with_profile(
-            'anothercust', 'customer')
-        Review.objects.create(business_user=other_business,
-                              reviewer=another_customer, rating=5)
+        Review.objects.create(business_user=self.business_user, reviewer=self.customer_user, rating=4)
+        another_customer, _ = create_user_with_profile('anothercust', 'customer')
+        Review.objects.create(business_user=other_business, reviewer=another_customer, rating=5)
         self.authenticate(self.customer_token)
 
-        response = self.client.get(
-            self.url, {'business_user_id': self.business_user.id})
+        response = self.client.get(self.url, {'business_user_id': self.business_user.id})
 
         self.assertEqual(len(response.data), 1)
         self.assertEqual(
@@ -66,8 +60,7 @@ class ReviewListCreateTests(APITestCase):
 
     def test_create_requires_authentication(self) -> None:
         """Creating a review without a token should be rejected with 401."""
-        response = self.client.post(
-            self.url, {'business_user': self.business_user.id, 'rating': 4}, format='json')
+        response = self.client.post(self.url, {'business_user': self.business_user.id, 'rating': 4}, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -75,16 +68,14 @@ class ReviewListCreateTests(APITestCase):
         """A business user should not be allowed to create reviews."""
         self.authenticate(self.business_token)
 
-        response = self.client.post(
-            self.url, {'business_user': self.business_user.id, 'rating': 4}, format='json')
+        response = self.client.post(self.url, {'business_user': self.business_user.id, 'rating': 4}, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_success_for_customer(self) -> None:
         """A customer should be able to create a review for a business user."""
         self.authenticate(self.customer_token)
-        payload = {'business_user': self.business_user.id,
-                   'rating': 4, 'description': 'Great work!'}
+        payload = {'business_user': self.business_user.id, 'rating': 4, 'description': 'Great work!'}
 
         response = self.client.post(self.url, payload, format='json')
 
@@ -118,16 +109,11 @@ class ReviewDetailTests(APITestCase):
 
     def setUp(self) -> None:
         """Create a review authored by a customer for a business user."""
-        self.business_user, _ = create_user_with_profile(
-            'detailbiz', 'business')
-        self.reviewer, self.reviewer_token = create_user_with_profile(
-            'detailreviewer', 'customer')
-        self.other_user, self.other_token = create_user_with_profile(
-            'otherreviewer', 'customer')
+        self.business_user, _ = create_user_with_profile('detailbiz', 'business')
+        self.reviewer, self.reviewer_token = create_user_with_profile('detailreviewer', 'customer')
+        self.other_user, self.other_token = create_user_with_profile('otherreviewer', 'customer')
 
-        self.review = Review.objects.create(
-            business_user=self.business_user, reviewer=self.reviewer, rating=3, description='Okay service.',
-        )
+        self.review = Review.objects.create(business_user=self.business_user, reviewer=self.reviewer, rating=3, description='Okay service.')
         self.url = reverse('review-detail', kwargs={'pk': self.review.id})
 
     def authenticate(self, token: Token) -> None:
@@ -144,8 +130,7 @@ class ReviewDetailTests(APITestCase):
         """The review's author should be able to update rating and description."""
         self.authenticate(self.reviewer_token)
 
-        response = self.client.patch(
-            self.url, {'rating': 5, 'description': 'Even better!'}, format='json')
+        response = self.client.patch(self.url, {'rating': 5, 'description': 'Even better!'}, format='json')
         self.review.refresh_from_db()
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -157,8 +142,7 @@ class ReviewDetailTests(APITestCase):
         other_business, _ = create_user_with_profile('sneakybiz', 'business')
         self.authenticate(self.reviewer_token)
 
-        self.client.patch(
-            self.url, {'business_user': other_business.id}, format='json')
+        self.client.patch(self.url, {'business_user': other_business.id}, format='json')
         self.review.refresh_from_db()
 
         self.assertEqual(self.review.business_user, self.business_user)

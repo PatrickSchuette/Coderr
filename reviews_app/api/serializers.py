@@ -29,8 +29,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         """Ensure the target user actually has a business profile."""
         profile = getattr(value, 'profile', None)
         if not profile or profile.type != Profile.ProfileType.BUSINESS:
-            raise serializers.ValidationError(
-                'The selected user is not a business user.')
+            raise serializers.ValidationError('The selected user is not a business user.')
         return value
 
     def validate(self, attrs: dict) -> dict:

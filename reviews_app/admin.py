@@ -9,5 +9,4 @@ class ReviewAdmin(admin.ModelAdmin):
 
     list_display = ('business_user', 'reviewer', 'rating', 'created_at')
     list_filter = ('rating',)
-    search_fields = ('business_user__username',
-                     'reviewer__username', 'description')
+    search_fields = ('business_user__username', 'reviewer__username', 'description')

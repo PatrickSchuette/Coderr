@@ -8,11 +8,7 @@ from rest_framework.serializers import BaseSerializer
 
 from reviews_app.api.filters import ReviewFilter
 from reviews_app.api.permissions import IsCustomerUser, IsReviewOwner
-from reviews_app.api.serializers import (
-    ReviewCreateSerializer,
-    ReviewSerializer,
-    ReviewUpdateSerializer,
-)
+from reviews_app.api.serializers import (ReviewCreateSerializer, ReviewSerializer, ReviewUpdateSerializer)
 from reviews_app.models import Review
 
 
