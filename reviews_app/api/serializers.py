@@ -9,8 +9,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['id', 'business_user', 'reviewer', 'rating',
-                  'description', 'created_at', 'updated_at']
+        fields = ['id', 'business_user', 'reviewer', 'rating', 'description', 'created_at', 'updated_at']
         read_only_fields = fields
 
 
@@ -23,8 +22,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['id', 'business_user', 'reviewer', 'rating',
-                  'description', 'created_at', 'updated_at']
+        fields = ['id', 'business_user', 'reviewer', 'rating', 'description', 'created_at', 'updated_at']
         read_only_fields = ['id', 'reviewer', 'created_at', 'updated_at']
 
     def validate_business_user(self, value) -> object:
@@ -40,8 +38,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         reviewer = self.context['request'].user
         business_user = attrs.get('business_user')
         if Review.objects.filter(business_user=business_user, reviewer=reviewer).exists():
-            raise serializers.ValidationError(
-                'You have already reviewed this business user.')
+            raise serializers.ValidationError('You have already reviewed this business user.')
         return attrs
 
     def create(self, validated_data: dict) -> Review:
@@ -54,7 +51,5 @@ class ReviewUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['id', 'business_user', 'reviewer', 'rating',
-                  'description', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'business_user',
-                            'reviewer', 'created_at', 'updated_at']
+        fields = ['id', 'business_user', 'reviewer', 'rating', 'description', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'business_user', 'reviewer', 'created_at', 'updated_at']
