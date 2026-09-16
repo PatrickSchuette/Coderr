@@ -1,0 +1,1929 @@
+{
+  "info": {
+    "_postman_id": "972724a9-1a3f-4fcd-8dc9-d2161918a9ea",
+    "name": "Coderr",
+    "description": "Full happy-path / unhappy-path test suite for the Coderr backend.\n\nIMPORTANT: Run the whole collection top-to-bottom (Collection Runner), not individual requests in isolation. Later requests depend on environment variables (tokens, IDs) set by earlier ones. The 'cleanup' folder must run last, since 'unhappy path > Reviews > create_review_duplicate' still needs the review created in 'happy path' to exist.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56702018"
+  },
+  "item": [
+    {
+      "name": "happy path",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "register_business",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const NAME = pm.variables.replaceIn(\"{{$randomFirstName}} {{$randomLastName}}\");\nconst USERNAME = NAME.toLowerCase().replace(/ /g, '_');\nconst EMAIL = `${USERNAME}@test.de`;\npm.variables.set(\"USERNAME\", USERNAME);\npm.variables.set(\"EMAIL\", EMAIL);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));\nconst body = pm.response.json();\npm.test(\"Response has token and user_id\", () => {\n    pm.expect(body).to.have.property('token');\n    pm.expect(body).to.have.property('user_id');\n});\nif (pm.response.code === 201) {\n    pm.environment.set(\"BusinessToken\", body.token);\n    pm.environment.set(\"businessUserId\", body.user_id);\n    pm.environment.set(\"businessUsername\", body.username);\n}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"username\": \"{{USERNAME}}\",\n    \"email\": \"{{EMAIL}}\",\n    \"password\": \"{{password}}\",\n    \"repeated_password\": \"{{password}}\",\n    \"type\": \"business\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/registration/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "registration",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "register_customer",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const NAME = pm.variables.replaceIn(\"{{$randomFirstName}} {{$randomLastName}}\");\nconst USERNAME = NAME.toLowerCase().replace(/ /g, '_');\nconst EMAIL = `${USERNAME}@test.de`;\npm.variables.set(\"USERNAME\", USERNAME);\npm.variables.set(\"EMAIL\", EMAIL);"
+                    ]
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));\nconst body = pm.response.json();\npm.test(\"Response has token and user_id\", () => {\n    pm.expect(body).to.have.property('token');\n    pm.expect(body).to.have.property('user_id');\n});\nif (pm.response.code === 201) {\n    pm.environment.set(\"CustomerToken\", body.token);\n    pm.environment.set(\"customerUserId\", body.user_id);\n    pm.environment.set(\"customerUsername\", body.username);\n}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"username\": \"{{USERNAME}}\",\n    \"email\": \"{{EMAIL}}\",\n    \"password\": \"{{password}}\",\n    \"repeated_password\": \"{{password}}\",\n    \"type\": \"customer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/registration/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "registration",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "login_business",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response has token\", () => pm.expect(body).to.have.property('token'));",
+                      "if (pm.response.code === 200) { pm.environment.set(\"BusinessToken\", body.token); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"username\": \"{{businessUsername}}\",\n    \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/login/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "login",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "login_customer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response has token\", () => pm.expect(body).to.have.property('token'));",
+                      "if (pm.response.code === 200) { pm.environment.set(\"CustomerToken\", body.token); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"username\": \"{{customerUsername}}\",\n    \"password\": \"{{password}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/login/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "login",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Profile",
+          "item": [
+            {
+              "name": "get_own_profile_business",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Profile belongs to the business user\", () => pm.expect(body.user).to.eql(Number(pm.environment.get('businessUserId'))));",
+                      "pm.test(\"Type is business\", () => pm.expect(body.type).to.eql('business'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/profile/{{businessUserId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "{{businessUserId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "patch_own_profile_business",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"first_name was updated\", () => pm.expect(body.first_name).to.eql('Max'));",
+                      "pm.test(\"location was updated\", () => pm.expect(body.location).to.eql('Berlin'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"first_name\": \"Max\",\n    \"last_name\": \"Mustermann\",\n    \"location\": \"Berlin\",\n    \"tel\": \"123456789\",\n    \"description\": \"Professional business description\",\n    \"working_hours\": \"9-17\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/profile/{{businessUserId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "{{businessUserId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "list_business_profiles",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response is an array\", () => pm.expect(body).to.be.an('array'));",
+                      "pm.test(\"Contains our business user\", () => {",
+                      "    const ids = body.map(p => p.user);",
+                      "    pm.expect(ids).to.include(Number(pm.environment.get('businessUserId')));",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/profiles/business/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "business",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "list_customer_profiles",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response is an array\", () => pm.expect(body).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/profiles/customer/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "customer",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Offers",
+          "item": [
+            {
+              "name": "create_offer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Offer has exactly 3 details\", () => pm.expect(body.details.length).to.eql(3));",
+                      "if (pm.response.code === 201) {",
+                      "    pm.environment.set(\"offerId\", body.id);",
+                      "    const basic = body.details.find(d => d.offer_type === 'basic');",
+                      "    pm.environment.set(\"offerDetailId\", basic.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Grafikdesign-Paket\",\n    \"description\": \"Ein umfassendes Grafikdesign-Paket fuer Unternehmen.\",\n    \"details\": [\n        {\"title\": \"Basic Design\", \"revisions\": 2, \"delivery_time_in_days\": 5, \"price\": 100, \"features\": [\"Logo Design\", \"Visitenkarte\"], \"offer_type\": \"basic\"},\n        {\"title\": \"Standard Design\", \"revisions\": 5, \"delivery_time_in_days\": 7, \"price\": 200, \"features\": [\"Logo Design\", \"Visitenkarte\", \"Briefpapier\"], \"offer_type\": \"standard\"},\n        {\"title\": \"Premium Design\", \"revisions\": 10, \"delivery_time_in_days\": 10, \"price\": 500, \"features\": [\"Logo Design\", \"Visitenkarte\", \"Briefpapier\", \"Flyer\"], \"offer_type\": \"premium\"}\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/offers/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "list_offers",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response has pagination fields\", () => {",
+                      "    pm.expect(body).to.have.property('count');",
+                      "    pm.expect(body).to.have.property('results');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/offers/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get_offer_detail",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Offer id matches\", () => pm.expect(body.id).to.eql(Number(pm.environment.get('offerId'))));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/offers/{{offerId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    "{{offerId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get_offerdetail_single",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"offer_type is basic\", () => pm.expect(body.offer_type).to.eql('basic'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/offerdetails/{{offerDetailId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offerdetails",
+                    "{{offerDetailId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "patch_offer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Title was updated\", () => pm.expect(body.title).to.eql('Updated Grafikdesign-Paket'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Updated Grafikdesign-Paket\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/offers/{{offerId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    "{{offerId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Orders",
+          "item": [
+            {
+              "name": "create_order",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Status is in_progress\", () => pm.expect(body.status).to.eql('in_progress'));",
+                      "if (pm.response.code === 201) { pm.environment.set(\"orderId\", body.id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"offer_detail_id\": {{offerDetailId}}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/orders/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "list_orders_customer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response is an array\", () => pm.expect(body).to.be.an('array'));",
+                      "pm.test(\"Contains our order\", () => {",
+                      "    const ids = body.map(o => o.id);",
+                      "    pm.expect(ids).to.include(Number(pm.environment.get('orderId')));",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/orders/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "list_orders_business",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response is an array\", () => pm.expect(body).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/orders/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update_order_status",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Status is now completed\", () => pm.expect(body.status).to.eql('completed'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"status\": \"completed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/orders/{{orderId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "{{orderId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "order_count",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response has order_count\", () => pm.expect(body).to.have.property('order_count'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/order-count/{{businessUserId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "order-count",
+                    "{{businessUserId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "completed_order_count",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"At least one completed order\", () => pm.expect(body.completed_order_count).to.be.at.least(1));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/completed-order-count/{{businessUserId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "completed-order-count",
+                    "{{businessUserId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Reviews",
+          "item": [
+            {
+              "name": "create_review",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Reviewer matches the customer\", () => pm.expect(body.reviewer).to.eql(Number(pm.environment.get('customerUserId'))));",
+                      "if (pm.response.code === 201) { pm.environment.set(\"reviewId\", body.id); }"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"business_user\": {{businessUserId}},\n    \"rating\": 4,\n    \"description\": \"Alles war toll!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/reviews/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "list_reviews",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response is an array\", () => pm.expect(body).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/reviews/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update_review",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Rating was updated\", () => pm.expect(body.rating).to.eql(5));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rating\": 5,\n    \"description\": \"Noch besser als erwartet!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/reviews/{{reviewId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    "{{reviewId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "BaseInfo",
+          "item": [
+            {
+              "name": "get_base_info",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));",
+                      "const body = pm.response.json();",
+                      "pm.test(\"Response has all expected fields\", () => {",
+                      "    pm.expect(body).to.have.property('review_count');",
+                      "    pm.expect(body).to.have.property('average_rating');",
+                      "    pm.expect(body).to.have.property('business_profile_count');",
+                      "    pm.expect(body).to.have.property('offer_count');",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/base-info/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "base-info",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unhappy path",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "register_duplicate_username",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"username\": \"{{businessUsername}}\",\n    \"email\": \"someone-else@test.de\",\n    \"password\": \"{{password}}\",\n    \"repeated_password\": \"{{password}}\",\n    \"type\": \"business\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/registration/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "registration",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "login_wrong_password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"username\": \"{{businessUsername}}\",\n    \"password\": \"totally_wrong_password\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/login/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "login",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "register_password_mismatch",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"username\": \"mismatch_user_{{$timestamp}}\",\n    \"email\": \"mismatch_{{$timestamp}}@test.de\",\n    \"password\": \"{{password}}\",\n    \"repeated_password\": \"totally_different\",\n    \"type\": \"business\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/registration/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "registration",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Profile",
+          "item": [
+            {
+              "name": "get_profile_unauthenticated",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 401\", () => pm.response.to.have.status(401));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/profile/{{businessUserId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "{{businessUserId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "patch_profile_wrong_owner",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"first_name\": \"Hacker\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/profile/{{businessUserId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "{{businessUserId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get_profile_not_found",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/profile/999999999/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "999999999",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Offers",
+          "item": [
+            {
+              "name": "create_offer_unauthenticated",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 401\", () => pm.response.to.have.status(401));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"x\",\n    \"description\": \"x\",\n    \"details\": []\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/offers/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create_offer_as_customer",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Should fail\",\n    \"description\": \"x\",\n    \"details\": [\n        {\"title\": \"Basic\", \"revisions\": 1, \"delivery_time_in_days\": 1, \"price\": 10, \"features\": [], \"offer_type\": \"basic\"},\n        {\"title\": \"Standard\", \"revisions\": 1, \"delivery_time_in_days\": 1, \"price\": 20, \"features\": [], \"offer_type\": \"standard\"},\n        {\"title\": \"Premium\", \"revisions\": 1, \"delivery_time_in_days\": 1, \"price\": 30, \"features\": [], \"offer_type\": \"premium\"}\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/offers/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create_offer_missing_details",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Incomplete offer\",\n    \"description\": \"x\",\n    \"details\": [\n        {\"title\": \"Basic\", \"revisions\": 1, \"delivery_time_in_days\": 1, \"price\": 10, \"features\": [], \"offer_type\": \"basic\"},\n        {\"title\": \"Standard\", \"revisions\": 1, \"delivery_time_in_days\": 1, \"price\": 20, \"features\": [], \"offer_type\": \"standard\"}\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/offers/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update_offer_not_owner",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Hacked title\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/offers/{{offerId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    "{{offerId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get_offer_not_found",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/offers/999999999/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "offers",
+                    "999999999",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Orders",
+          "item": [
+            {
+              "name": "create_order_unauthenticated",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 401\", () => pm.response.to.have.status(401));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"offer_detail_id\": {{offerDetailId}}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/orders/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create_order_as_business",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"offer_detail_id\": {{offerDetailId}}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/orders/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create_order_invalid_offer_detail",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 404\", () => pm.response.to.have.status(404));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"offer_detail_id\": 999999999\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/orders/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update_order_status_wrong_user",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"status\": \"cancelled\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/orders/{{orderId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "{{orderId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete_order_non_admin",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/orders/{{orderId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "{{orderId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Reviews",
+          "item": [
+            {
+              "name": "create_review_unauthenticated",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 401\", () => pm.response.to.have.status(401));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"business_user\": {{businessUserId}},\n    \"rating\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/reviews/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create_review_as_business",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"business_user\": {{businessUserId}},\n    \"rating\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/reviews/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create_review_duplicate",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 400\", () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{CustomerToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"business_user\": {{businessUserId}},\n    \"rating\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/reviews/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update_review_wrong_owner",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 403\", () => pm.response.to.have.status(403));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Token {{BusinessToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"rating\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/reviews/{{reviewId}}/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    "{{reviewId}}",
+                    ""
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cleanup",
+      "item": [
+        {
+          "name": "delete_offer_as_owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{BusinessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/offers/{{offerId}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offers",
+                "{{offerId}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete_review_as_owner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{CustomerToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reviews/{{reviewId}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reviews",
+                "{{reviewId}}",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
