@@ -209,6 +209,16 @@ class OfferRetrieveUpdateDeleteTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(detail.title, 'Basic Updated')
         self.assertEqual(float(detail.price), 120.0)
+        
+    def test_update_fails_for_offer_type_not_present_on_this_offer(self) -> None:
+        """PATCHing a valid offer_type that this specific offer doesn't have should return 400."""
+        self.authenticate(self.owner_token)
+        self.offer.details.filter(offer_type='basic').delete()
+        payload = {'details': [{'offer_type': 'basic', 'title': 'x', 'revisions': 1, 'delivery_time_in_days': 1, 'price': 1, 'features': []}]}
+
+        response = self.client.patch(self.url, payload, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_non_owner_cannot_update_offer(self) -> None:
         """A user who does not own the offer should receive 403 on PATCH."""

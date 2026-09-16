@@ -109,6 +109,15 @@ class OfferUpdateSerializer(serializers.ModelSerializer):
         model = Offer
         fields = ['id', 'title', 'image', 'description', 'details']
 
+    def validate_details(self, value: list) -> list:
+        """Ensure every referenced offer_type actually belongs to this offer."""
+        existing_types = set(self.instance.details.values_list('offer_type', flat=True))
+        for detail_data in value:
+            offer_type = detail_data.get('offer_type')
+            if offer_type not in existing_types:
+                raise serializers.ValidationError(f"This offer has no '{offer_type}' tier to update.")
+        return value
+
     def update(self, instance: Offer, validated_data: dict) -> Offer:
         """Update the offer's own fields and, if provided, matching detail tiers by offer_type."""
         details_data = validated_data.pop('details', None)
@@ -119,9 +128,7 @@ class OfferUpdateSerializer(serializers.ModelSerializer):
 
         if details_data:
             for detail_data in details_data:
-                detail = instance.details.filter(offer_type=detail_data.get('offer_type')).first()
-                if detail is None:
-                    continue
+                detail = instance.details.get(offer_type=detail_data['offer_type'])
                 for attr, value in detail_data.items():
                     setattr(detail, attr, value)
                 detail.save()
